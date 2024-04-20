@@ -17,7 +17,6 @@ async def search_film_filters_menu_handler(
         "Введите фильм, который хотите найти, или выберите по критериям ниже",
         reply_markup=keyboards.get_search_film_filters_menu_keyboard()
     )
-    await state.update_data(search_filters=SearchFilters())
     await state.set_state(states.SelectingFilm.waiting_for_rating)
     await callback.answer()
 
@@ -174,4 +173,3 @@ async def enter_rating_handler(message: Message, state: FSMContext):
 
 # todo: add check if value is not modified
 # todo: replace edit text to edit keyboard
-# todo: fix bug with lost data
