@@ -28,6 +28,7 @@ class NavigateButton(CallbackData, prefix="navigate"):
 
 
 class DataType(enum.Enum):
+    Quality = "Quality"
     AgeRestriction = "AgeRestriction"
     Genre = "Genre"
 

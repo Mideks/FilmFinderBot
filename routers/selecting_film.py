@@ -80,3 +80,31 @@ async def select_age_restriction_handler(
         reply_markup=keyboards.get_age_restriction_keyboard(str(search_filters.age_restriction))
     )
     await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SelectQuality))
+async def select_quality_menu_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+
+    await callback.message.edit_text(
+        "Выберите желаемое качество. Будут показаны фильмы не ниже выбранного качества",
+        reply_markup=keyboards.get_quality_keyboard(search_filters.quality)
+    )
+
+    await callback.answer()
+
+
+@router.callback_query(DataButton.filter(F.type == DataType.Quality))
+async def select_quality_handler(
+        callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+    search_filters.quality = callback_data.data
+    await state.update_data(search_filters=search_filters)
+
+    await callback.message.edit_text(
+        "Выберите желаемое качество. Будут показаны фильмы не ниже выбранного качества",
+        reply_markup=keyboards.get_quality_keyboard(search_filters.quality)
+    )
+    await callback.answer()

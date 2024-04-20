@@ -35,7 +35,7 @@ def get_search_film_filters_menu_keyboard() -> InlineKeyboardMarkup:
     builder.button(text="🔍 Искать!",
                    callback_data=NavigateButton(location=NavigateButtonLocation.StartSearch))
 
-    builder.adjust(2,2,2,1)
+    builder.adjust(2, 2, 2, 1)
 
     return builder.as_markup()
 
@@ -86,5 +86,29 @@ def get_age_restriction_keyboard(selected_age_restriction: str) -> InlineKeyboar
                    callback_data=NavigateButton(location=NavigateButtonLocation.Search))
 
     builder.adjust(5, 1)
+
+    return builder.as_markup()
+
+
+def get_quality_keyboard(selected_quality: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    qualities = ["144", "240", "360", "480", "720", "1080", "1440", "2160"]
+
+    for quality in qualities:
+        if quality == selected_quality:
+            button_text = f"✅ {quality}p"
+        else:
+            button_text = f"{quality}p"
+
+        builder.button(
+            text=button_text,
+            callback_data=DataButton(type=DataType.Quality, data=quality)
+        )
+
+    builder.button(text="◀️ Назад к фильтрам",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+
+    builder.adjust(4, 4, 1)
 
     return builder.as_markup()
