@@ -12,6 +12,14 @@ class ActionButton(CallbackData, prefix="action"):
 
 
 class NavigateButtonLocation(enum.Enum):
+    StartSearch = "StartSearch"
+    SelectQuality = "SelectQuality"
+    SelectDuration = "SelectDuration"
+    SelectActor = "SelectActor"
+    SelectAgeRestriction = "SelectAgeRestriction"
+    SelectRating = "SelectRating"
+    SelectGenre = "SelectGenre"
+    SearchByFrame = "SearchByFrame"
     Search = "Search"
 
 
