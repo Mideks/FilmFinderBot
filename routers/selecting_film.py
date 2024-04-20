@@ -47,9 +47,9 @@ async def select_genre_handler(
         search_filters.genres.remove(genre)
 
     await state.update_data(search_filters=search_filters)
-    await callback.message.edit_text(
-        f"Выберите желаемые жанры",
-        reply_markup=keyboards.get_select_genre_keyboard(search_filters.genres))
+    await callback.message.edit_reply_markup(
+        reply_markup=keyboards.get_select_genre_keyboard(search_filters.genres)
+    )
 
     await callback.answer()
 
@@ -76,8 +76,7 @@ async def select_age_restriction_handler(
     search_filters.age_restriction = int(callback_data.data)
     await state.update_data(search_filters=search_filters)
 
-    await callback.message.edit_text(
-        "Выберите возрастное ограничение",
+    await callback.message.edit_reply_markup(
         reply_markup=keyboards.get_age_restriction_keyboard(str(search_filters.age_restriction))
     )
     await callback.answer()
@@ -104,8 +103,7 @@ async def select_quality_handler(
     search_filters.quality = callback_data.data
     await state.update_data(search_filters=search_filters)
 
-    await callback.message.edit_text(
-        "Выберите желаемое качество. Будут показаны фильмы не ниже выбранного качества",
+    await callback.message.edit_reply_markup(
         reply_markup=keyboards.get_quality_keyboard(search_filters.quality)
     )
     await callback.answer()
@@ -136,9 +134,7 @@ async def select_quality_handler(
     search_filters.rating = float(callback_data.data)
     await state.update_data(search_filters=search_filters)
 
-    await callback.message.edit_text(
-        "Выберите желаемый рейтинг фильма. Либо вы можете ввести своё значение.\n"
-        "Пример: 4.1",
+    await callback.message.edit_reply_markup(
         reply_markup=keyboards.get_rating_keyboard(str(search_filters.rating))
     )
     await callback.answer()
@@ -163,13 +159,10 @@ async def enter_rating_handler(message: Message, state: FSMContext):
     await state.update_data(search_filters=search_filters)
 
     bot_message: Message = data["bot_message"]
-    await bot_message.edit_text(
-        "Выберите желаемый рейтинг фильма. Либо вы можете ввести своё значение.\n"
-        "Пример: 4.1",
+    await bot_message.edit_reply_markup(
         reply_markup=keyboards.get_rating_keyboard(str(search_filters.rating))
     )
 
     await message.delete()
 
 # todo: add check if value is not modified
-# todo: replace edit text to edit keyboard
