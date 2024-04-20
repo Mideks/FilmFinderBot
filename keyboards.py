@@ -67,3 +67,27 @@ def get_select_genre_keyboard(
     builder.adjust(1)
 
     return builder.as_markup()
+
+
+def get_age_restriction_keyboard(selected_age_restriction: Optional[str] = "0") -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    age_restrictions = ["0", "6", "12", "16", "18"]
+
+    for age_restriction in age_restrictions:
+        if age_restriction == selected_age_restriction:
+            button_text = f"✅ {age_restriction}+"
+        else:
+            button_text = f"{age_restriction}+"
+
+        builder.button(
+            text=button_text,
+            callback_data=DataButton(type=DataType.AgeRestriction, data=age_restriction)
+        )
+
+    builder.button(text="◀️ Назад к фильтрам",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+
+    builder.adjust(5, 1)
+
+    return builder.as_markup()

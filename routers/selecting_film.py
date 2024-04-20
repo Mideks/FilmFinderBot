@@ -49,4 +49,34 @@ async def select_genre_handler(
     await callback.message.edit_text(
         f"Выберите желаемые жанры",
         reply_markup=keyboards.get_select_genre_keyboard(search_filters.genres))
+
+    await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SelectAgeRestriction))
+async def select_age_restriction_menu_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+
+    await callback.message.edit_text(
+        "Выберите возрастное ограничение",
+        reply_markup=keyboards.get_age_restriction_keyboard(str(search_filters.age_restriction))
+    )
+
+    await callback.answer()
+
+
+@router.callback_query(DataButton.filter(F.type == DataType.AgeRestriction))
+async def select_age_restriction_handler(
+        callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
+
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+    search_filters.age_restriction = int(callback_data.data)
+    await state.update_data(search_filters=search_filters)
+
+    await callback.message.edit_text(
+        "Выберите возрастное ограничение",
+        reply_markup=keyboards.get_age_restriction_keyboard(str(search_filters.age_restriction))
+    )
     await callback.answer()
