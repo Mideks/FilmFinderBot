@@ -112,3 +112,42 @@ def get_quality_keyboard(selected_quality: str) -> InlineKeyboardMarkup:
     builder.adjust(4, 4, 1)
 
     return builder.as_markup()
+
+
+def get_rating_keyboard(selected_rating: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    default_ratings = ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]
+
+    for rating in default_ratings:
+        if rating == selected_rating:
+            button_text = f"✅ от {rating}"
+        else:
+            button_text = f"от {rating}"
+
+        builder.button(
+            text=button_text,
+            callback_data=DataButton(type=DataType.Rating, data=rating)
+        )
+
+    any_text = "Любой рейтинг"
+    if float(selected_rating) == 0:
+        any_text = f"✅ {any_text}"
+
+    builder.button(
+        text=any_text,
+        callback_data=DataButton(type=DataType.Rating, data="0")
+    )
+
+    if selected_rating not in default_ratings and float(selected_rating) != 0:
+        builder.button(
+            text=f"✅ Ваш выбор: от {selected_rating} ⭐️",
+            callback_data=DataButton(type=DataType.Rating, data=selected_rating)
+        )
+
+    builder.button(text="◀️ Назад к фильтрам",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+
+    builder.adjust(3, 3, 3, 1, 1)
+
+    return builder.as_markup()

@@ -1,8 +1,9 @@
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 
 import keyboards
+import states
 from callback_buttons import NavigateButton, NavigateButtonLocation, DataButton, DataType
 from search_filters import SearchFilters
 
@@ -17,6 +18,7 @@ async def search_film_filters_menu_handler(
         reply_markup=keyboards.get_search_film_filters_menu_keyboard()
     )
     await state.update_data(search_filters=SearchFilters())
+    await state.set_state(states.SelectingFilm.waiting_for_rating)
     await callback.answer()
 
 
@@ -108,3 +110,68 @@ async def select_quality_handler(
         reply_markup=keyboards.get_quality_keyboard(search_filters.quality)
     )
     await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SelectRating))
+async def select_quality_menu_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+
+    await callback.message.edit_text(
+        "Выберите желаемый рейтинг фильма. Либо вы можете ввести своё значение.\n"
+        "Пример: 4.1",
+        reply_markup=keyboards.get_rating_keyboard(str(search_filters.rating))
+    )
+
+    await state.set_state(states.SelectingFilm.waiting_for_rating)
+    await state.update_data(bot_message=callback.message)
+
+    await callback.answer()
+
+
+@router.callback_query(DataButton.filter(F.type == DataType.Rating))
+async def select_quality_handler(
+        callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+    search_filters.rating = float(callback_data.data)
+    await state.update_data(search_filters=search_filters)
+
+    await callback.message.edit_text(
+        "Выберите желаемый рейтинг фильма. Либо вы можете ввести своё значение.\n"
+        "Пример: 4.1",
+        reply_markup=keyboards.get_rating_keyboard(str(search_filters.rating))
+    )
+    await callback.answer()
+
+
+@router.message(states.SelectingFilm.waiting_for_rating)
+async def enter_rating_handler(message: Message, state: FSMContext):
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+
+    try:
+        value = float(message.text)
+        search_filters.rating = value
+    except ValueError:
+        await message.delete()
+        return
+
+    if value < 0 or value > 5:
+        await message.delete()
+        return
+
+    await state.update_data(search_filters=search_filters)
+
+    bot_message: Message = data["bot_message"]
+    await bot_message.edit_text(
+        "Выберите желаемый рейтинг фильма. Либо вы можете ввести своё значение.\n"
+        "Пример: 4.1",
+        reply_markup=keyboards.get_rating_keyboard(str(search_filters.rating))
+    )
+
+    await message.delete()
+
+# todo: add check if value is not modified
+# todo: replace edit text to edit keyboard
+# todo: fix bug with lost data
