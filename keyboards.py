@@ -40,10 +40,7 @@ def get_search_film_filters_menu_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_select_genre_keyboard(
-        selected_genres: Optional[Set[str]] = None) -> InlineKeyboardMarkup:
-    if selected_genres is None:
-        selected_genres = set()
+def get_select_genre_keyboard(selected_genres: Set[str]) -> InlineKeyboardMarkup:
 
     builder = InlineKeyboardBuilder()
 
@@ -69,7 +66,7 @@ def get_select_genre_keyboard(
     return builder.as_markup()
 
 
-def get_age_restriction_keyboard(selected_age_restriction: Optional[str] = "0") -> InlineKeyboardMarkup:
+def get_age_restriction_keyboard(selected_age_restriction: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     age_restrictions = ["0", "6", "12", "16", "18"]
