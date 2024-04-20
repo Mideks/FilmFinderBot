@@ -26,3 +26,11 @@ class NavigateButtonLocation(enum.Enum):
 class NavigateButton(CallbackData, prefix="navigate"):
     location: NavigateButtonLocation
 
+
+class DataType(enum.Enum):
+    Genre = "Genre"
+
+
+class DataButton(CallbackData, prefix="select_genre"):
+    type: DataType
+    data: str
