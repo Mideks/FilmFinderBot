@@ -12,7 +12,7 @@ class ActionButton(CallbackData, prefix="action"):
 
 
 class NavigateButtonLocation(enum.Enum):
-    pass
+    Search = "Search"
 
 
 class NavigateButton(CallbackData, prefix="navigate"):
