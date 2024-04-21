@@ -189,3 +189,13 @@ def get_duration_keyboard(selected_duration: str) -> InlineKeyboardMarkup:
     builder.adjust(3, 3, 3, 1, 1)
 
     return builder.as_markup()
+
+
+def get_film_card_keyboard(film: dict) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🎲 Другой фильм", callback_data="None")
+    builder.button(text="🔗 Связанные фильмы", callback_data="None")
+    builder.button(text="◀️ Поменять фильтры", callback_data="None")
+    builder.adjust(1)
+
+    return builder.as_markup()
