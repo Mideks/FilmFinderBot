@@ -147,7 +147,6 @@ async def enter_rating_handler(message: Message, state: FSMContext):
 
     try:
         value = float(message.text)
-        search_filters.rating = value
     except ValueError:
         await message.delete()
         return
@@ -155,6 +154,8 @@ async def enter_rating_handler(message: Message, state: FSMContext):
     if value < 0 or value > 5:
         await message.delete()
         return
+
+    search_filters.rating = value
 
     await state.update_data(search_filters=search_filters)
 
