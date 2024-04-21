@@ -17,7 +17,7 @@ async def search_film_filters_menu_handler(
         "Введите фильм, который хотите найти, или выберите по критериям ниже",
         reply_markup=keyboards.get_search_film_filters_menu_keyboard()
     )
-    await state.set_state(states.SelectingFilm.waiting_for_rating)
+    await state.set_state(states.SelectingFilm.main_menu)
     await callback.answer()
 
 
