@@ -151,3 +151,41 @@ def get_rating_keyboard(selected_rating: str) -> InlineKeyboardMarkup:
     builder.adjust(3, 3, 3, 1, 1)
 
     return builder.as_markup()
+
+
+def get_duration_keyboard(selected_duration: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    default_durations = ["10", "15", "30", "45", "60", "90", "120", "150", "180"]
+
+    for duration in default_durations:
+        button_text = f"от {duration} мин"
+        if duration == selected_duration:
+            button_text = f"✅ {button_text}"
+
+        builder.button(
+            text=button_text,
+            callback_data=DataButton(type=DataType.Duration, data=duration)
+        )
+
+    any_text = "Любая длительность"
+    if int(selected_duration) == 0:
+        any_text = f"✅ {any_text}"
+
+    builder.button(
+        text=any_text,
+        callback_data=DataButton(type=DataType.Duration, data="0")
+    )
+
+    if selected_duration not in default_durations and int(selected_duration) != 0:
+        builder.button(
+            text=f"✅ Ваш выбор: от {selected_duration} мин ⏳",
+            callback_data=DataButton(type=DataType.Duration, data=selected_duration)
+        )
+
+    builder.button(text="◀️ Назад к фильтрам",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+
+    builder.adjust(3, 3, 3, 1, 1)
+
+    return builder.as_markup()
