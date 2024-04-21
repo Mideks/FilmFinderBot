@@ -210,7 +210,7 @@ async def enter_duration_handler(message: Message, state: FSMContext):
         await message.delete()
         return
 
-    if value < 0:
+    if value < 0 or value > 1000:
         await message.delete()
         return
 
