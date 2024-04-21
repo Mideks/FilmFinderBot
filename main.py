@@ -9,6 +9,7 @@ from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
+from middlewares.search_filter_checker import SearchFilterChecker
 from routers import commands, selecting_film
 
 TOKEN = getenv("BOT_TOKEN")
@@ -18,6 +19,7 @@ dp = Dispatcher()
 async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
+    dp.update.middleware(SearchFilterChecker())
     dp.include_router(commands.router)
     dp.include_router(selecting_film.router)
 
