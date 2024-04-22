@@ -142,7 +142,7 @@ def get_rating_keyboard(selected_rating: str) -> InlineKeyboardMarkup:
 
     if selected_rating not in default_ratings and float(selected_rating) != 0:
         builder.button(
-            text=f"✅ Ваш выбор: от {selected_rating} ⭐️",
+            text=f"✅ Ваш выбор: от {selected_rating:.2f} ⭐️",
             callback_data=DataButton(type=DataType.Rating, data=selected_rating)
         )
 
@@ -180,7 +180,7 @@ def get_duration_keyboard(selected_duration: str) -> InlineKeyboardMarkup:
 
     if selected_duration not in default_durations and int(selected_duration) != 0:
         builder.button(
-            text=f"✅ Ваш выбор: от {selected_duration} мин ⏳",
+            text=f"✅ Ваш выбор: до {selected_duration} мин ⏳",
             callback_data=DataButton(type=DataType.Duration, data=selected_duration)
         )
 
