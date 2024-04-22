@@ -205,7 +205,8 @@ def get_film_card_keyboard(film: dict) -> InlineKeyboardMarkup:
         builder.button(text=f"🔗 Связанные фильмы ({len(related_movies)})",
                        callback_data=NavigateButton(location=NavigateButtonLocation.ShowRelatedMovies))
 
-    builder.button(text="◀️ Поменять фильтры", callback_data="None")
+    builder.button(text="◀️ Поменять фильтры",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.BackToSearch))
     builder.adjust(1)
 
     return builder.as_markup()

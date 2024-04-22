@@ -10,15 +10,34 @@ from search_filters import SearchFilters
 router = Router()
 
 
+async def send_search_film_filters_menu_message(
+        message: Message, state: FSMContext, send_as_new: bool = False):
+    text = ("Введите название фильма, который вы хотели бы посмотреть, "
+            "или найдите себе фильм по критериям ниже.")
+    if send_as_new:
+        await message.answer(
+            text, reply_markup=keyboards.get_search_film_filters_menu_keyboard()
+        )
+        await message.delete()
+    else:
+        await message.edit_text(
+            text, reply_markup=keyboards.get_search_film_filters_menu_keyboard()
+        )
+    await state.update_data(selected_film=None, search_result=None)
+    await state.set_state(states.SelectingFilm.main_menu)
+
+
 @router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.Search))
 async def search_film_filters_menu_handler(
         callback: CallbackQuery, state: FSMContext) -> None:
-    await callback.message.edit_text(
-        "Введите название фильма, который вы хотели бы посмотреть, "
-        "или найдите себе фильм по критериям ниже.",
-        reply_markup=keyboards.get_search_film_filters_menu_keyboard()
-    )
-    await state.set_state(states.SelectingFilm.main_menu)
+    await send_search_film_filters_menu_message(callback.message, state)
+    await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.BackToSearch))
+async def search_film_filters_menu_handler(
+        callback: CallbackQuery, state: FSMContext) -> None:
+    await send_search_film_filters_menu_message(callback.message, state, True)
     await callback.answer()
 
 
