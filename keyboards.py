@@ -194,12 +194,17 @@ def get_duration_keyboard(selected_duration: str) -> InlineKeyboardMarkup:
 
 def get_film_card_keyboard(film: dict) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
+    related_movies = film.get("relatedMovies", [])
+
     builder.button(text="🎲 Другой фильм",
                    callback_data=NavigateButton(location=NavigateButtonLocation.StartSearch))
-    builder.button(text="🔗 Связанные фильмы",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.ShowRelatedMovies))
     builder.button(text="👁 Где посмотреть",
                    callback_data=NavigateButton(location=NavigateButtonLocation.ShowMovieLinks))
+
+    if len(related_movies) > 0:
+        builder.button(text=f"🔗 Связанные фильмы ({len(related_movies)})",
+                       callback_data=NavigateButton(location=NavigateButtonLocation.ShowRelatedMovies))
+
     builder.button(text="◀️ Поменять фильтры", callback_data="None")
     builder.adjust(1)
 
