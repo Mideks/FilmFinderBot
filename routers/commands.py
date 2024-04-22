@@ -14,6 +14,10 @@ router = Router()
 async def command_start_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     await state.update_data(search_filters=SearchFilters())
-    await message.answer(f"Добро пожаловать! Я бот для поиска фильмов и сериалов!",
-                         reply_markup=get_menu_keyboard())
+    await message.answer(
+        f"Добро пожаловать, пользователь!\n"
+        f"Я бот для поиска фильмов и сериалов."
+        f" Вы можете искать фильмы по различным фильтрам или даже по кадру.\n"
+        f"Чтобы начать поиск, нажми на кнопку ниже.",
+        reply_markup=get_menu_keyboard())
     await message.delete()

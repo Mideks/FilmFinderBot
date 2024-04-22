@@ -159,7 +159,7 @@ def get_duration_keyboard(selected_duration: str) -> InlineKeyboardMarkup:
     default_durations = ["10", "15", "30", "45", "60", "90", "120", "150", "180"]
 
     for duration in default_durations:
-        button_text = f"от {duration} мин"
+        button_text = f"до {duration} мин"
         if duration == selected_duration:
             button_text = f"✅ {button_text}"
 

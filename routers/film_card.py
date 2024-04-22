@@ -16,10 +16,14 @@ async def start_search_menu_handler(
         callback: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
     film: dict = search_film_by_filters(data["search_filters"])
+    if film is None:
+        await callback.message.answer("Ничего не найдено, извините(")
+        return
+
     max_quality = max(film['availableQuality'])
     links = '\n'.join(film['links'])
     text = (
-        "Мы нашли подходящий фильм по вашему запросу:\n\n"
+        "Мы нашли подходящий фильм по вашему запросу, приятного просмотра!\n\n"
         f"{film['rating']} ⭐️\n"
         f"<b>{film['title']}</b>, {film['ageRestriction']}+\n"
         f"{film['description']}\n\n"
