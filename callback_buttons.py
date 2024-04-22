@@ -30,7 +30,7 @@ class NavigateButton(CallbackData, prefix="navigate"):
 
 
 class DataType(enum.Enum):
-    FilmTitle = "FilmTitle"
+    FilmId = "FilmId"
     Duration = "Duration"
     Rating = "Rating"
     Quality = "Quality"
