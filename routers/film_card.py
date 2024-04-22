@@ -3,13 +3,12 @@ import random
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, FSInputFile, InputMediaPhoto
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
+from tinydb.table import Document
 
 import keyboards
-import states
 from callback_buttons import NavigateButton, NavigateButtonLocation, DataButton, DataType
-from db_functions import search_films_by_filters
-from search_filters import SearchFilters
+from db_functions import search_films_by_filters, get_film_by_title, get_film_by_id
 
 router = Router()
 
@@ -18,51 +17,109 @@ router = Router()
 async def start_search_menu_handler(
         callback: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
-    films: list[dict] = data.get("search_result", None)
+    films: list[Document] = data.get("search_result", None)
 
     is_first_search_result = False
     if films is None:
         films = search_films_by_filters(data["search_filters"])
         if len(films) == 0:
-            await callback.message.answer("Ничего не найдено, извините(")
+            await callback.answer("Ничего не найдено, извините(")
             return
 
         await state.update_data(search_result=films)
         is_first_search_result = True
 
-    chosen_film = random.choice(films)
-    text = await generate_film_card_text(chosen_film)
+    selected_film = random.choice(films)
+    await state.update_data(selected_film=selected_film)
+    await send_film_message(callback.message, selected_film, is_first_search_result)
 
-    path = "films/" + chosen_film["image"]
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.ShowMovieLinks))
+async def show_movie_links_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    film: Document = data.get("selected_film", None)
+    if film is None:
+        await callback.answer("Произошла ошибка...")
+        return
+
+    links = '\n'.join(film['links'])
+    text = (
+        f"Где посмотреть:\n"
+        f"{links}"
+    )
+
+    path = "films/" + film["image"]
+    photo = FSInputFile(path)
+    await callback.message.edit_media(
+        media=InputMediaPhoto(media=photo, caption=text),
+        reply_markup=keyboards.get_show_movie_links_keyboard(film.doc_id)
+    )
+
+    await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.ShowRelatedMovies))
+async def show_related_movies_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    film: Document = data.get("selected_film", None)
+    if film is None:
+        await callback.answer("Произошла ошибка...")
+        return
+
+    related_movies = film['relatedMovies']
+    text = (f"<b>{film['title']}</b>, {film['ageRestriction']}+\n\n"
+            f"Есть некоторые фильмы, которые связаны с текущим. Нажмите на кнопку, чтобы перейти к нем.")
+
+    path = "films/" + film["image"]
+    photo = FSInputFile(path)
+    await callback.message.edit_media(
+        media=InputMediaPhoto(media=photo, caption=text),
+        reply_markup=keyboards.get_show_related_movies_keyboard(film.doc_id, related_movies)
+    )
+
+    await callback.answer()
+
+
+async def send_film_message(message: Message, film: dict, send_as_new: bool = False):
+    text = await generate_film_card_text(film)
+
+    path = "films/" + film["image"]
     if not os.path.exists(path):
         # todo: исправить все ошибки с ненайденными файлами
-        await callback.message.answer("Извините, не удалось отправить картинку")
+        await message.answer("Извините, не удалось отправить картинку")
         print(f"photo_path = {path} не существует")
         return
 
     photo = FSInputFile(path)
-    if is_first_search_result:
-        await callback.message.answer_photo(
+    if send_as_new:
+        await message.answer_photo(
             photo=photo, caption=text,
-            reply_markup=keyboards.get_film_card_keyboard(chosen_film)
+            reply_markup=keyboards.get_film_card_keyboard(film)
         )
-        await callback.message.delete()
+        await message.delete()
     else:
-        await callback.message.edit_media(
+        await message.edit_media(
             media=InputMediaPhoto(media=photo, caption=text),
-            reply_markup=keyboards.get_film_card_keyboard(chosen_film)
+            reply_markup=keyboards.get_film_card_keyboard(film)
         )
 
 
-@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.StartSearch))
-async def start_search_menu_handler(
-        callback: CallbackQuery, state: FSMContext) -> None:
-    pass
+@router.callback_query(DataButton.filter(F.type == DataType.FilmId))
+async def navigate_to_film_handler(
+        callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
+    film_id = int(callback_data.data)
+    film = get_film_by_id(film_id)
+    if film is not None:
+        await state.update_data(selected_film=film)
+        await send_film_message(callback.message, film)
+        await callback.answer()
+    else:
+        await callback.answer('Фильм не найден...')
 
 
 async def generate_film_card_text(film):
     max_quality = max(film['availableQuality'])
-    links = '\n'.join(film['links'])
+
     text = (
                "Мы нашли подходящий фильм по вашему запросу, приятного просмотра!\n\n"
                f"{film['rating']} ⭐️\n"
@@ -71,8 +128,6 @@ async def generate_film_card_text(film):
                f"Жанры: {', '.join(film['genres'])}\n"
                f"Продолжительность: {film['duration']} мин.\n"
                f"Доступное качество: {max_quality}p\n"
-               f"Актёры: {', '.join(film['actors'])}\n"
-               f"Где посмотреть:\n"
-               f"{links}"
+               f"Актёры: {', '.join(film['actors'])}"
            )[:1024]  # todo: сделать что-то с выходом за лимит количества символов
     return text

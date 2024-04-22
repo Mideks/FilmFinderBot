@@ -3,6 +3,7 @@ from typing import Set, Optional
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+import db_functions
 from callback_buttons import *
 
 
@@ -195,8 +196,45 @@ def get_film_card_keyboard(film: dict) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(text="🎲 Другой фильм",
                    callback_data=NavigateButton(location=NavigateButtonLocation.StartSearch))
-    builder.button(text="🔗 Связанные фильмы", callback_data="None")
+    builder.button(text="🔗 Связанные фильмы",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.ShowRelatedMovies))
+    builder.button(text="👁 Где посмотреть",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.ShowMovieLinks))
     builder.button(text="◀️ Поменять фильтры", callback_data="None")
+    builder.adjust(1)
+
+    return builder.as_markup()
+
+
+def get_show_movie_links_keyboard(selected_film_id: int) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text="◀️ Назад к фильму",
+                   callback_data=DataButton(type=DataType.FilmId, data=str(selected_film_id)))
+    builder.adjust(1)
+
+    return builder.as_markup()
+
+
+def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list[str]):
+    builder = InlineKeyboardBuilder()
+    # todo: add indicator, that will display, if film in our db
+    for related_movie in related_movies:
+        movie = db_functions.get_film_by_title(related_movie)
+
+        if movie is not None:
+            doc_id = movie.doc_id
+            text = f"✔️ {related_movie}"
+        else:
+            doc_id = -1
+            text = f"✖️ {related_movie}"
+
+        builder.button(
+            text=text,
+            callback_data=DataButton(type=DataType.FilmId, data=str(doc_id))
+        )
+
+    builder.button(text="◀️ Назад к фильму",
+                   callback_data=DataButton(type=DataType.FilmId, data=str(selected_film_id)))
     builder.adjust(1)
 
     return builder.as_markup()
