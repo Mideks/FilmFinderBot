@@ -1,3 +1,4 @@
+import random
 from typing import Any, Optional
 from tinydb import TinyDB, Query
 from tinydb.table import Document
@@ -16,6 +17,6 @@ def search_film_by_filters(filters: SearchFilters) -> Optional[dict]:
         # & (Film.availableQuality.any([filters.quality]))
     )
     if len(result) > 0:
-        return result[0]
+        return random.choice(result)
     else:
         return None

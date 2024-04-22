@@ -1,6 +1,8 @@
+import os
+
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, FSInputFile
 
 import keyboards
 import states
@@ -33,10 +35,18 @@ async def start_search_menu_handler(
         f"Актёры: {', '.join(film['actors'])}\n"
         f"Где посмотреть:\n"
         f"{links}"
-    )
+           )[:1024]  # todo: сделать что-то с выходом за лимит количества символов
 
+    path = "films/" + film["image"]
+    if not os.path.exists(path):
+        # todo: исправить все ошибки с ненайденными файлами
+        await callback.message.answer("Извините, не удалось отправить картинку")
+        print(f"photo_path = {path} не существует")
+        return
+
+    photo = FSInputFile(path)
     await callback.message.delete()
     await callback.message.answer_photo(
-        photo=film["image"],
+        photo=photo,
         caption=text, reply_markup=keyboards.get_film_card_keyboard(film))
 
