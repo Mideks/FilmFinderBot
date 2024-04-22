@@ -1,8 +1,9 @@
 import os
+from collections import defaultdict
 
 from tinydb import TinyDB, Query
 
-db = TinyDB('films/info.json')
+db = TinyDB('../films/info.json')
 
 Film = Query()
 result = [d['image'] for d in db.all()]
