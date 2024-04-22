@@ -8,7 +8,7 @@ from search_filters import SearchFilters
 db = TinyDB('films/info.json')
 
 
-def search_film_by_filters(filters: SearchFilters) -> Optional[dict]:
+def search_films_by_filters(filters: SearchFilters) -> list[dict]:
     Film = Query()
 
     result = db.search(
@@ -16,7 +16,4 @@ def search_film_by_filters(filters: SearchFilters) -> Optional[dict]:
         & (Film.duration <= filters.duration)
         # & (Film.availableQuality.any([filters.quality]))
     )
-    if len(result) > 0:
-        return random.choice(result)
-    else:
-        return None
+    return result
