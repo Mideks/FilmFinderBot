@@ -205,10 +205,26 @@ def get_film_card_keyboard(film: dict) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_show_movie_links_keyboard() -> InlineKeyboardMarkup:
+def get_show_movie_links_keyboard(selected_film: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(text="◀️ Назад к фильму",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.StartSearch))
+                   callback_data=DataButton(type=DataType.FilmTitle, data=selected_film))
+    builder.adjust(1)
+
+    return builder.as_markup()
+
+
+def get_show_related_movies_keyboard(selected_film: str, related_movies: list[str]):
+    builder = InlineKeyboardBuilder()
+    # todo: add indicator, that will display, if film in our db
+    for related_movie in related_movies:
+        builder.button(
+            text=related_movie,
+            callback_data=DataButton(type=DataType.FilmTitle, data=related_movie)
+        )
+
+    builder.button(text="◀️ Назад к фильму",
+                   callback_data=DataButton(type=DataType.FilmTitle, data=selected_film))
     builder.adjust(1)
 
     return builder.as_markup()

@@ -3,13 +3,11 @@ import random
 
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, FSInputFile, InputMediaPhoto
+from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto
 
 import keyboards
-import states
-from callback_buttons import NavigateButton, NavigateButtonLocation, DataButton, DataType
+from callback_buttons import NavigateButton, NavigateButtonLocation
 from db_functions import search_films_by_filters
-from search_filters import SearchFilters
 
 router = Router()
 
@@ -73,7 +71,29 @@ async def show_movie_links_handler(callback: CallbackQuery, state: FSMContext) -
     photo = FSInputFile(path)
     await callback.message.edit_media(
         media=InputMediaPhoto(media=photo, caption=text),
-        reply_markup=keyboards.get_show_movie_links_keyboard()
+        reply_markup=keyboards.get_show_movie_links_keyboard(film['title'])
+    )
+
+    await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.ShowRelatedMovies))
+async def show_related_movies_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    film: dict = data.get("selected_film", None)
+    if film is None:
+        await callback.answer("Произошла ошибка...")
+        return
+
+    related_movies = film['relatedMovies']
+    text = (f"<b>{film['title']}</b>, {film['ageRestriction']}+\n\n"
+            f"Есть некоторые фильмы, которые связаны с текущим. Нажмите на кнопку, чтобы перейти к нем.")
+
+    path = "films/" + film["image"]
+    photo = FSInputFile(path)
+    await callback.message.edit_media(
+        media=InputMediaPhoto(media=photo, caption=text),
+        reply_markup=keyboards.get_show_related_movies_keyboard(film['title'], related_movies)
     )
 
     await callback.answer()

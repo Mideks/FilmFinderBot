@@ -30,6 +30,7 @@ class NavigateButton(CallbackData, prefix="navigate"):
 
 
 class DataType(enum.Enum):
+    FilmTitle = "FilmTitle"
     Duration = "Duration"
     Rating = "Rating"
     Quality = "Quality"
@@ -37,6 +38,6 @@ class DataType(enum.Enum):
     Genre = "Genre"
 
 
-class DataButton(CallbackData, prefix="select_genre"):
+class DataButton(CallbackData, prefix="select_genre", sep=">"):
     type: DataType
     data: str
