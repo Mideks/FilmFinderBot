@@ -12,6 +12,8 @@ class ActionButton(CallbackData, prefix="action"):
 
 
 class NavigateButtonLocation(enum.Enum):
+    ShowMovieLinks = "ShowMovieLinks"
+    ShowRelatedMovies = "ShowRelatedMovies"
     StartSearch = "StartSearch"
     SelectQuality = "SelectQuality"
     SelectDuration = "SelectDuration"

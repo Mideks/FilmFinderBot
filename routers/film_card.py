@@ -30,10 +30,11 @@ async def start_search_menu_handler(
         await state.update_data(search_result=films)
         is_first_search_result = True
 
-    chosen_film = random.choice(films)
-    text = await generate_film_card_text(chosen_film)
+    selected_film = random.choice(films)
+    await state.update_data(selected_film=selected_film)
+    text = await generate_film_card_text(selected_film)
 
-    path = "films/" + chosen_film["image"]
+    path = "films/" + selected_film["image"]
     if not os.path.exists(path):
         # todo: исправить все ошибки с ненайденными файлами
         await callback.message.answer("Извините, не удалось отправить картинку")
@@ -44,25 +45,43 @@ async def start_search_menu_handler(
     if is_first_search_result:
         await callback.message.answer_photo(
             photo=photo, caption=text,
-            reply_markup=keyboards.get_film_card_keyboard(chosen_film)
+            reply_markup=keyboards.get_film_card_keyboard(selected_film)
         )
         await callback.message.delete()
     else:
         await callback.message.edit_media(
             media=InputMediaPhoto(media=photo, caption=text),
-            reply_markup=keyboards.get_film_card_keyboard(chosen_film)
+            reply_markup=keyboards.get_film_card_keyboard(selected_film)
         )
 
 
-@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.StartSearch))
-async def start_search_menu_handler(
-        callback: CallbackQuery, state: FSMContext) -> None:
-    pass
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.ShowMovieLinks))
+async def show_movie_links_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    film: dict = data.get("selected_film", None)
+    if film is None:
+        await callback.answer("Произошла ошибка...")
+        return
+
+    links = '\n'.join(film['links'])
+    text = (
+        f"Где посмотреть:\n"
+        f"{links}"
+    )
+
+    path = "films/" + film["image"]
+    photo = FSInputFile(path)
+    await callback.message.edit_media(
+        media=InputMediaPhoto(media=photo, caption=text),
+        reply_markup=keyboards.get_show_movie_links_keyboard()
+    )
+
+    await callback.answer()
 
 
 async def generate_film_card_text(film):
     max_quality = max(film['availableQuality'])
-    links = '\n'.join(film['links'])
+
     text = (
                "Мы нашли подходящий фильм по вашему запросу, приятного просмотра!\n\n"
                f"{film['rating']} ⭐️\n"
@@ -71,8 +90,6 @@ async def generate_film_card_text(film):
                f"Жанры: {', '.join(film['genres'])}\n"
                f"Продолжительность: {film['duration']} мин.\n"
                f"Доступное качество: {max_quality}p\n"
-               f"Актёры: {', '.join(film['actors'])}\n"
-               f"Где посмотреть:\n"
-               f"{links}"
+               f"Актёры: {', '.join(film['actors'])}"
            )[:1024]  # todo: сделать что-то с выходом за лимит количества символов
     return text
