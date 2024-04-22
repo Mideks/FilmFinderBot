@@ -9,7 +9,6 @@ from search_filters import SearchFilters
 router = Router()
 
 
-# todo: delete old bot message, if we know it
 @router.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
@@ -20,4 +19,3 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
         f" Вы можете искать фильмы по различным фильтрам или даже по кадру.\n"
         f"Чтобы начать поиск, нажми на кнопку ниже.",
         reply_markup=get_menu_keyboard())
-    await message.delete()
