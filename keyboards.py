@@ -42,17 +42,14 @@ def get_search_film_filters_menu_keyboard() -> InlineKeyboardMarkup:
 
 
 def get_select_genre_keyboard(selected_genres: Set[str]) -> InlineKeyboardMarkup:
-
     builder = InlineKeyboardBuilder()
+    genres = db_functions.get_films_genres()
+    max_genres = 10
 
-    # todo: добавить реальные жанры
-    genres = ["Боевик", "Драма", "..."]
-
-    for genre in genres:
+    for genre, n in genres.most_common(max_genres):
+        button_text = f"{genre.capitalize()} ({n})"
         if genre in selected_genres:
-            button_text = f"✅ {genre}"
-        else:
-            button_text = f"{genre}"
+            button_text = f"✅ {button_text}"
 
         builder.button(
             text=button_text,
@@ -62,7 +59,7 @@ def get_select_genre_keyboard(selected_genres: Set[str]) -> InlineKeyboardMarkup
     builder.button(text="◀️ Назад к фильтрам",
                    callback_data=NavigateButton(location=NavigateButtonLocation.Search))
 
-    builder.adjust(1)
+    builder.adjust(2)
 
     return builder.as_markup()
 
@@ -118,7 +115,7 @@ def get_quality_keyboard(selected_quality: str) -> InlineKeyboardMarkup:
 def get_rating_keyboard(selected_rating: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    default_ratings = ["1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]
+    default_ratings = ["0.5", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5", "4.0", "4.5"]
 
     for rating in default_ratings:
         if rating == selected_rating:
@@ -223,7 +220,7 @@ def get_show_movie_links_keyboard(selected_film_id: int) -> InlineKeyboardMarkup
 
 def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list[str]):
     builder = InlineKeyboardBuilder()
-    # todo: add indicator, that will display, if film in our db
+
     for related_movie in related_movies:
         movie = db_functions.get_film_by_title(related_movie)
 

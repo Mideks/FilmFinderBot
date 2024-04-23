@@ -47,7 +47,8 @@ async def select_genre_menu_handler(callback: CallbackQuery, state: FSMContext) 
     search_filters: SearchFilters = data["search_filters"]
 
     await callback.message.edit_text(
-        "Выберите желаемые жанры:",
+        "🎭 Выберите желаемые жанры. \n"
+        "Мы постараемся для вас найти фильм, в котором совпадает хотя бы один жанр",
         reply_markup=keyboards.get_select_genre_keyboard(search_filters.genres)
     )
 
