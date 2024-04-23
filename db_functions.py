@@ -10,11 +10,18 @@ db = TinyDB('films/info.json')
 
 def search_films_by_filters(filters: SearchFilters) -> list[Document]:
     Film = Query()
+    duration = filters.duration
+    if duration == 0:
+        duration = 999999
+
+    def has_quality_not_less_than(quality_list: list[int], min_quality: int):
+        return any(quality >= min_quality for quality in quality_list)
 
     result = db.search(
         (Film.rating >= filters.rating)
-        & (Film.duration <= filters.duration)
-        # & (Film.availableQuality.any([filters.quality]))
+        & (Film.duration <= duration)
+        & (Film.availableQuality.test(has_quality_not_less_than, int(filters.quality)))
+        & (Film.ageRestriction <= filters.age_restriction)
     )
     return result
 
