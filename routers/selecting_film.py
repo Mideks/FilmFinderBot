@@ -81,7 +81,7 @@ async def select_age_restriction_menu_handler(callback: CallbackQuery, state: FS
     search_filters: SearchFilters = data["search_filters"]
 
     await callback.message.edit_text(
-        "Выберите возрастное ограничение.\n"
+        "🔞 Выберите возрастное ограничение.\n"
         "Будут найдены фильмы не выше выбранного возрастного ограничения.",
         reply_markup=keyboards.get_age_restriction_keyboard(str(search_filters.age_restriction))
     )
@@ -110,7 +110,7 @@ async def select_quality_menu_handler(callback: CallbackQuery, state: FSMContext
     search_filters: SearchFilters = data["search_filters"]
 
     await callback.message.edit_text(
-        "Выберите желаемое качество.\n"
+        "🖼 Выберите желаемое качество.\n"
         "Будут найдены фильмы с качеством не ниже выбранного.",
         reply_markup=keyboards.get_quality_keyboard(search_filters.quality)
     )
@@ -138,7 +138,7 @@ async def select_quality_menu_handler(callback: CallbackQuery, state: FSMContext
     search_filters: SearchFilters = data["search_filters"]
 
     await callback.message.edit_text(
-        "Выберите желаемый рейтинг фильма или введите своё значение.\n"
+        "⭐️ Выберите желаемый рейтинг фильма или введите своё значение.\n"
         "Пример: <i>4.1</i>\n",
         reply_markup=keyboards.get_rating_keyboard(str(search_filters.rating))
     )
@@ -196,7 +196,7 @@ async def select_duration_menu_handler(callback: CallbackQuery, state: FSMContex
     search_filters: SearchFilters = data["search_filters"]
 
     await callback.message.edit_text(
-        "⏳Выберите максимальную продолжительность фильма или и введите своё значение\n"
+        "⏳ Выберите максимальную продолжительность фильма или и введите своё значение\n"
         "Пример: <i>25</>\n",
         reply_markup=keyboards.get_duration_keyboard(str(search_filters.duration))
     )
