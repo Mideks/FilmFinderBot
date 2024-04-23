@@ -12,8 +12,20 @@ router = Router()
 
 async def send_search_film_filters_menu_message(
         message: Message, state: FSMContext, send_as_new: bool = False):
-    text = ("✍️ Введите название фильма, который вы хотели бы посмотреть"
-            "или найдите себе фильм по критериям ниже.")
+    data = await state.get_data()
+    filters: SearchFilters = data["search_filters"]
+
+    text = (
+        f"✍️ Введите название фильма, который вы хотели бы посмотреть"
+        f"или найдите себе фильм по критериям ниже.\n\n"
+        f"Ваш выбор\n"
+        f"<b>Рейтинг:</b> {'любой' if filters.rating == 0 else f'от {filters.rating} ⭐️'}\n"
+        f"<b>Возрастное ограничение:</b> {filters.age_restriction}+\n"
+        f"<b>Жанры:</b> {'любые' if len(filters.genres) == 0 else ', '.join(filters.genres)}\n"
+        f"<b>Длительность:</b> {'любая' if filters.duration == 0 else f'до {filters.duration} мин.'}\n"
+        f"<b>Качество:</b> от {filters.quality}p\n"
+    )
+
     if send_as_new:
         await message.answer(
             text, reply_markup=keyboards.get_search_film_filters_menu_keyboard()
