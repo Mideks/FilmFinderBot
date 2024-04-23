@@ -44,7 +44,7 @@ async def show_movie_links_handler(callback: CallbackQuery, state: FSMContext) -
 
     links = '\n'.join(film['links'])
     text = (
-        f"Где посмотреть:\n"
+        f"👀 Вот некоторые места, где можно посмотреть этот фильм:\n"
         f"{links}"
     )
 
@@ -122,12 +122,12 @@ async def generate_film_card_text(film):
 
     text = (
                "Мы нашли подходящий фильм по вашему запросу, приятного просмотра!\n\n"
-               f"{film['rating']} ⭐️\n"
                f"<b>{film['title']}</b>, {film['ageRestriction']}+\n"
-               f"{film['description']}\n\n"
-               f"Жанры: {', '.join(film['genres'])}\n"
-               f"Продолжительность: {film['duration']} мин.\n"
-               f"Доступное качество: {max_quality}p\n"
-               f"Актёры: {', '.join(film['actors'])}"
+               f"{film['rating']} ⭐️\n\n"
+               f"<i>{film['description']}</i>\n\n"
+               f"<b>Жанры</b>: {', '.join(film['genres'])}\n"
+               f"<b>Продолжительность</b>: {film['duration']} мин.\n"
+               f"<b>Доступное качество</b>: {max_quality}p\n"
+               f"<b>Актёры</b>: {', '.join(film['actors'])}"
            )[:1024]  # todo: сделать что-то с выходом за лимит количества символов
     return text

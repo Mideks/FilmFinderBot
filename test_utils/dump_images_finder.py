@@ -19,7 +19,7 @@ def find_dump_images(directory):
 
 
 # Specify the directory to search
-directory = "films"
+directory = "../films"
 
 # Find all dump images in the specified directory
 dump_images = find_dump_images(directory)

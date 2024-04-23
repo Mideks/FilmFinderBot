@@ -12,7 +12,7 @@ router = Router()
 
 async def send_search_film_filters_menu_message(
         message: Message, state: FSMContext, send_as_new: bool = False):
-    text = ("Введите название фильма, который вы хотели бы посмотреть, "
+    text = ("✍️ Введите название фильма, который вы хотели бы посмотреть"
             "или найдите себе фильм по критериям ниже.")
     if send_as_new:
         await message.answer(
@@ -195,9 +195,8 @@ async def select_duration_menu_handler(callback: CallbackQuery, state: FSMContex
     search_filters: SearchFilters = data["search_filters"]
 
     await callback.message.edit_text(
-        "Выберите желаемую продолжительность фильма или и введите своё значение.\n"
-        "Пример: 25\n"
-        "Будут найдены фильмы не более выбранной продолжительности.",
+        "⏳Выберите максимальную продолжительность фильма или и введите своё значение\n"
+        "Пример: <i>25</>\n",
         reply_markup=keyboards.get_duration_keyboard(str(search_filters.duration))
     )
 

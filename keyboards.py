@@ -31,7 +31,7 @@ def get_search_film_filters_menu_keyboard() -> InlineKeyboardMarkup:
                    callback_data=NavigateButton(location=NavigateButtonLocation.SelectActor))
     builder.button(text="⌛️ Продолжительность",
                    callback_data=NavigateButton(location=NavigateButtonLocation.SelectDuration))
-    builder.button(text="⌛ Качество",
+    builder.button(text="🖼 Качество",
                    callback_data=NavigateButton(location=NavigateButtonLocation.SelectQuality))
     builder.button(text="🔍 Искать!",
                    callback_data=NavigateButton(location=NavigateButtonLocation.StartSearch))
