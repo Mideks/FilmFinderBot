@@ -6,9 +6,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, InputMediaPhoto, Message
 from tinydb.table import Document
 
+import db_functions
 import keyboards
+import states
 from callback_buttons import NavigateButton, NavigateButtonLocation, DataButton, DataType
 from db_functions import search_films_by_filters, get_film_by_title, get_film_by_id
+from search_filters import SearchFilters
 
 router = Router()
 
@@ -31,7 +34,26 @@ async def start_search_menu_handler(
 
     selected_film = random.choice(films)
     await state.update_data(selected_film=selected_film)
-    await send_film_message(callback.message, selected_film, is_first_search_result)
+    await state.set_state(None)
+    await send_film_message(callback.message, selected_film, state, is_first_search_result)
+
+
+@router.message(states.SelectingFilm.waiting_for_film_title)
+async def enter_film_title_handler(message: Message, state: FSMContext):
+    data = await state.get_data()
+    query = message.text
+    films = db_functions.search_film_by_party_title(query)
+
+    bot_message = data["bot_message"]
+    if len(films) == 0:
+        text = (f"😞 По вашему запросу <b>{query}</b> ничего не найдено.\n"
+                "Попробуйте задать запрос по-другому или поискать по фильтрам.")
+    else:
+        text = f"🔍 По вашему запросу <b>{query}</b> были найдены следующие фильмы:"
+
+    await bot_message.edit_text(
+        text, reply_markup=keyboards.get_search_by_title_result_keyboard(films))
+    await message.delete()
 
 
 @router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.ShowMovieLinks))
@@ -80,7 +102,7 @@ async def show_related_movies_handler(callback: CallbackQuery, state: FSMContext
     await callback.answer()
 
 
-async def send_film_message(message: Message, film: dict, send_as_new: bool = False):
+async def send_film_message(message: Message, film: dict, state: FSMContext, send_as_new: bool = False):
     # todo: сделать что-то с выходом за лимит количества символов
     text = generate_film_card_text(film)[:1024]
 
@@ -93,11 +115,12 @@ async def send_film_message(message: Message, film: dict, send_as_new: bool = Fa
 
     photo = FSInputFile(path)
     if send_as_new:
-        await message.answer_photo(
+        bot_message = await message.answer_photo(
             photo=photo, caption=text,
             reply_markup=keyboards.get_film_card_keyboard(film)
         )
         await message.delete()
+        await state.update_data(bot_message=bot_message)
     else:
         await message.edit_media(
             media=InputMediaPhoto(media=photo, caption=text),
@@ -108,11 +131,14 @@ async def send_film_message(message: Message, film: dict, send_as_new: bool = Fa
 @router.callback_query(DataButton.filter(F.type == DataType.FilmId))
 async def navigate_to_film_handler(
         callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
+    data = await state.get_data()
     film_id = int(callback_data.data)
     film = get_film_by_id(film_id)
     if film is not None:
         await state.update_data(selected_film=film)
-        await send_film_message(callback.message, film)
+        await state.set_state(None)
+        send_as_new = "bot_message" in data
+        await send_film_message(callback.message, film, state, send_as_new)
         await callback.answer()
     else:
         await callback.answer('Фильм не найден...')

@@ -2,6 +2,7 @@ from typing import Set, Optional
 
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from tinydb.table import Document
 
 import db_functions
 from callback_buttons import *
@@ -218,7 +219,7 @@ def get_show_movie_links_keyboard(selected_film_id: int) -> InlineKeyboardMarkup
     return builder.as_markup()
 
 
-def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list[str]):
+def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list[str]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for related_movie in related_movies:
@@ -240,4 +241,20 @@ def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list
                    callback_data=DataButton(type=DataType.FilmId, data=str(selected_film_id)))
     builder.adjust(1)
 
+    return builder.as_markup()
+
+
+def get_search_by_title_result_keyboard(films: list[Document]) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    for film in films:
+        builder.button(
+            text=film['title'],
+            callback_data=DataButton(type=DataType.FilmId, data=str(film.doc_id))
+        )
+
+    builder.button(text="◀️ Назад к фильтрам",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+
+    builder.adjust(1)
     return builder.as_markup()

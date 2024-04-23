@@ -27,16 +27,18 @@ async def send_search_film_filters_menu_message(
     )
 
     if send_as_new:
-        await message.answer(
+        bot_message = await message.answer(
             text, reply_markup=keyboards.get_search_film_filters_menu_keyboard()
         )
+        await state.update_data(bot_message=bot_message)
         await message.delete()
     else:
         await message.edit_text(
             text, reply_markup=keyboards.get_search_film_filters_menu_keyboard()
         )
+        await state.update_data(bot_message=message)
     await state.update_data(selected_film=None, search_result=None)
-    await state.set_state(states.SelectingFilm.main_menu)
+    await state.set_state(states.SelectingFilm.waiting_for_film_title)
 
 
 @router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.Search))
