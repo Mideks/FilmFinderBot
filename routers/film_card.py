@@ -66,7 +66,7 @@ async def show_movie_links_handler(callback: CallbackQuery, state: FSMContext) -
 
     links = '\n'.join(film['links'])
     text = (
-        f"👀 Вот некоторые места, где можно посмотреть этот фильм:\n"
+        f"👀 Вот некоторые места, где можно посмотреть <b>{film['title']}</b>:\n"
         f"{links}"
     )
 
