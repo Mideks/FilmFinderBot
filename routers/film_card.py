@@ -81,7 +81,8 @@ async def show_related_movies_handler(callback: CallbackQuery, state: FSMContext
 
 
 async def send_film_message(message: Message, film: dict, send_as_new: bool = False):
-    text = await generate_film_card_text(film)
+    # todo: сделать что-то с выходом за лимит количества символов
+    text = generate_film_card_text(film)[:1024]
 
     path = "films/" + film["image"]
     if not os.path.exists(path):
@@ -117,7 +118,7 @@ async def navigate_to_film_handler(
         await callback.answer('Фильм не найден...')
 
 
-async def generate_film_card_text(film):
+def generate_film_card_text(film):
     max_quality = max(film['availableQuality'])
 
     text = (
@@ -129,5 +130,5 @@ async def generate_film_card_text(film):
                f"<b>Продолжительность</b>: {film['duration']} мин.\n"
                f"<b>Доступное качество</b>: {max_quality}p\n"
                f"<b>Актёры</b>: {', '.join(film['actors'])}"
-           )[:1024]  # todo: сделать что-то с выходом за лимит количества символов
+    )
     return text
