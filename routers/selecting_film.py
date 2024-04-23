@@ -41,7 +41,7 @@ async def send_search_film_filters_menu_message(
     await state.set_state(states.SelectingFilm.waiting_for_film_title)
 
 
-@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.Search))
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SearchMenu))
 async def search_film_filters_menu_handler(
         callback: CallbackQuery, state: FSMContext) -> None:
     await send_search_film_filters_menu_message(callback.message, state)
@@ -53,6 +53,17 @@ async def search_film_filters_menu_handler(
         callback: CallbackQuery, state: FSMContext) -> None:
     await send_search_film_filters_menu_message(callback.message, state, True)
     await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.NewSearch))
+async def search_film_filters_menu_handler(
+        callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    filters: SearchFilters = data.get('search_filters')
+    if filters != SearchFilters():
+        await state.update_data(search_filters=SearchFilters())
+        await send_search_film_filters_menu_message(callback.message, state)
+    await callback.answer("Фильтры сброшены")
 
 
 @router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SelectGenre))
@@ -77,7 +88,7 @@ async def select_genre_handler(
     search_filters: SearchFilters = data["search_filters"]
     genre = callback_data.data
     if genre not in search_filters.genres:
-        search_filters.genres.add(genre)
+        search_filters.genres.append(genre)
     else:
         search_filters.genres.remove(genre)
 
