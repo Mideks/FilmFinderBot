@@ -82,7 +82,7 @@ async def show_related_movies_handler(callback: CallbackQuery, state: FSMContext
 
 async def send_film_message(message: Message, film: dict, send_as_new: bool = False):
     # todo: сделать что-то с выходом за лимит количества символов
-    text = await generate_film_card_text(film)[:1024]
+    text = generate_film_card_text(film)[:1024]
 
     path = "films/" + film["image"]
     if not os.path.exists(path):
