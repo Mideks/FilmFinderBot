@@ -27,19 +27,21 @@ async def send_search_film_filters_menu_message(
     )
 
     if send_as_new:
-        await message.answer(
+        bot_message = await message.answer(
             text, reply_markup=keyboards.get_search_film_filters_menu_keyboard()
         )
+        await state.update_data(bot_message=bot_message)
         await message.delete()
     else:
         await message.edit_text(
             text, reply_markup=keyboards.get_search_film_filters_menu_keyboard()
         )
+        await state.update_data(bot_message=message)
     await state.update_data(selected_film=None, search_result=None)
-    await state.set_state(states.SelectingFilm.main_menu)
+    await state.set_state(states.SelectingFilm.waiting_for_film_title)
 
 
-@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.Search))
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SearchMenu))
 async def search_film_filters_menu_handler(
         callback: CallbackQuery, state: FSMContext) -> None:
     await send_search_film_filters_menu_message(callback.message, state)
@@ -51,6 +53,17 @@ async def search_film_filters_menu_handler(
         callback: CallbackQuery, state: FSMContext) -> None:
     await send_search_film_filters_menu_message(callback.message, state, True)
     await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.NewSearch))
+async def search_film_filters_menu_handler(
+        callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    filters: SearchFilters = data.get('search_filters')
+    if filters != SearchFilters():
+        await state.update_data(search_filters=SearchFilters())
+        await send_search_film_filters_menu_message(callback.message, state)
+    await callback.answer("Фильтры сброшены")
 
 
 @router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SelectGenre))
@@ -75,7 +88,7 @@ async def select_genre_handler(
     search_filters: SearchFilters = data["search_filters"]
     genre = callback_data.data
     if genre not in search_filters.genres:
-        search_filters.genres.add(genre)
+        search_filters.genres.append(genre)
     else:
         search_filters.genres.remove(genre)
 
@@ -107,7 +120,13 @@ async def select_age_restriction_handler(
 
     data = await state.get_data()
     search_filters: SearchFilters = data["search_filters"]
-    search_filters.age_restriction = int(callback_data.data)
+
+    age_restriction = int(callback_data.data)
+    if age_restriction == search_filters.age_restriction:
+        await callback.answer()
+        return
+
+    search_filters.age_restriction = age_restriction
     await state.update_data(search_filters=search_filters)
 
     await callback.message.edit_reply_markup(
@@ -135,7 +154,13 @@ async def select_quality_handler(
         callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
     data = await state.get_data()
     search_filters: SearchFilters = data["search_filters"]
-    search_filters.quality = callback_data.data
+
+    quality = callback_data.data
+    if quality == search_filters.quality:
+        await callback.answer()
+        return
+
+    search_filters.quality = quality
     await state.update_data(search_filters=search_filters)
 
     await callback.message.edit_reply_markup(
@@ -166,7 +191,13 @@ async def select_quality_handler(
         callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
     data = await state.get_data()
     search_filters: SearchFilters = data["search_filters"]
-    search_filters.rating = float(callback_data.data)
+
+    rating = float(callback_data.data)
+    if rating == search_filters.rating:
+        await callback.answer()
+        return
+
+    search_filters.rating = rating
     await state.update_data(search_filters=search_filters)
 
     await callback.message.edit_reply_markup(
@@ -186,7 +217,7 @@ async def enter_rating_handler(message: Message, state: FSMContext):
         await message.delete()
         return
 
-    if value < 0 or value > 5:
+    if value < 0 or value > 5 or value == search_filters.rating:
         await message.delete()
         return
 
@@ -224,7 +255,13 @@ async def select_quality_handler(
         callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
     data = await state.get_data()
     search_filters: SearchFilters = data["search_filters"]
-    search_filters.duration = int(callback_data.data)
+
+    duration = int(callback_data.data)
+    if duration == search_filters.duration:
+        await callback.answer()
+        return
+
+    search_filters.duration = duration
     await state.update_data(search_filters=search_filters)
 
     await callback.message.edit_reply_markup(
@@ -244,7 +281,7 @@ async def enter_duration_handler(message: Message, state: FSMContext):
         await message.delete()
         return
 
-    if value < 0 or value > 1000:
+    if value < 0 or value > 1000 or value == search_filters.duration:
         await message.delete()
         return
 

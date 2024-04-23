@@ -2,6 +2,7 @@ from typing import Set, Optional
 
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from tinydb.table import Document
 
 import db_functions
 from callback_buttons import *
@@ -11,7 +12,7 @@ def get_menu_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.button(text="🔍 Искать!",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
     builder.button(text="🖼 Поиск по кадру",
                    callback_data=NavigateButton(location=NavigateButtonLocation.SearchByFrame))
 
@@ -33,6 +34,8 @@ def get_search_film_filters_menu_keyboard() -> InlineKeyboardMarkup:
                    callback_data=NavigateButton(location=NavigateButtonLocation.SelectDuration))
     builder.button(text="🖼 Качество",
                    callback_data=NavigateButton(location=NavigateButtonLocation.SelectQuality))
+    builder.button(text="❌ Сбросить фильтры",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.NewSearch))
     builder.button(text="🔍 Искать!",
                    callback_data=NavigateButton(location=NavigateButtonLocation.StartSearch))
 
@@ -41,7 +44,7 @@ def get_search_film_filters_menu_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_select_genre_keyboard(selected_genres: Set[str]) -> InlineKeyboardMarkup:
+def get_select_genre_keyboard(selected_genres: list[str]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     genres = db_functions.get_films_genres()
     max_genres = 10
@@ -57,7 +60,7 @@ def get_select_genre_keyboard(selected_genres: Set[str]) -> InlineKeyboardMarkup
         )
 
     builder.button(text="◀️ Назад к фильтрам",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
 
     builder.adjust(2)
 
@@ -81,7 +84,7 @@ def get_age_restriction_keyboard(selected_age_restriction: str) -> InlineKeyboar
         )
 
     builder.button(text="◀️ Назад к фильтрам",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
 
     builder.adjust(5, 1)
 
@@ -105,7 +108,7 @@ def get_quality_keyboard(selected_quality: str) -> InlineKeyboardMarkup:
         )
 
     builder.button(text="◀️ Назад к фильтрам",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
 
     builder.adjust(4, 4, 1)
 
@@ -144,7 +147,7 @@ def get_rating_keyboard(selected_rating: str) -> InlineKeyboardMarkup:
         )
 
     builder.button(text="◀️ Назад к фильтрам",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
 
     builder.adjust(3, 3, 3, 1, 1)
 
@@ -182,7 +185,7 @@ def get_duration_keyboard(selected_duration: str) -> InlineKeyboardMarkup:
         )
 
     builder.button(text="◀️ Назад к фильтрам",
-                   callback_data=NavigateButton(location=NavigateButtonLocation.Search))
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
 
     builder.adjust(3, 3, 3, 1, 1)
 
@@ -218,7 +221,7 @@ def get_show_movie_links_keyboard(selected_film_id: int) -> InlineKeyboardMarkup
     return builder.as_markup()
 
 
-def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list[str]):
+def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list[str]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for related_movie in related_movies:
@@ -240,4 +243,20 @@ def get_show_related_movies_keyboard(selected_film_id: int, related_movies: list
                    callback_data=DataButton(type=DataType.FilmId, data=str(selected_film_id)))
     builder.adjust(1)
 
+    return builder.as_markup()
+
+
+def get_search_by_title_result_keyboard(films: list[Document]) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    for film in films:
+        builder.button(
+            text=film['title'],
+            callback_data=DataButton(type=DataType.FilmId, data=str(film.doc_id))
+        )
+
+    builder.button(text="◀️ Назад к фильтрам",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
+
+    builder.adjust(1)
     return builder.as_markup()

@@ -1,4 +1,5 @@
 import random
+import re
 from collections import defaultdict, Counter
 from typing import Any, Optional
 from tinydb import TinyDB, Query
@@ -40,6 +41,12 @@ def get_film_by_title(title: str) -> Optional[Document]:
         return None
     else:
         return result[0]
+
+
+def search_film_by_party_title(party_title: str) -> list[Document]:
+    Film = Query()
+    result = db.search(Film.title.matches(party_title, flags=re.IGNORECASE))
+    return result
 
 
 def get_film_by_id(film_id: int) -> Optional[Document]:
