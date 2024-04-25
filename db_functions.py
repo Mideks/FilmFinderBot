@@ -12,29 +12,27 @@ db = TinyDB('films/info.json')
 
 def search_films_by_filters(filters: SearchFilters) -> list[Document]:
     Film = Query()
-    duration = filters.duration
-    if duration == 0:
-        duration = 999999
-
-    genres = filters.genres
-    if len(genres) == 0:
-        genres = list(get_films_genres())
-
-    actors = filters.actors
-    if len(actors) == 0:
-        actors = list(get_films_actors())
 
     def has_quality_not_less_than(quality_list: list[int], min_quality: int):
         return any(quality >= min_quality for quality in quality_list)
 
-    result = db.search(
-        (Film.rating >= filters.rating)
-        & (Film.duration <= duration)
-        & (Film.availableQuality.test(has_quality_not_less_than, int(filters.quality)))
-        & (Film.ageRestriction <= filters.age_restriction)
-        & (Film.actors.any(actors))
-        & (Film.genres.any(genres))
+    query = (
+            (Film.rating >= filters.rating)
+            & (Film.availableQuality.test(has_quality_not_less_than, int(filters.quality)))
+            & (Film.ageRestriction <= filters.age_restriction)
     )
+
+    if len(filters.genres) != 0:
+        query &= (Film.genres.any(filters.genres))
+
+    if len(filters.actors) != 0:
+        query &= (Film.actors.any(filters.actors))
+
+    if filters.duration != 0:
+        query &= (Film.duration <= filters.duration)
+
+    result = db.search(query)
+
     return result
 
 
@@ -70,7 +68,7 @@ def get_films_genres() -> Counter[str]:
 
 def get_films_actors() -> Counter[str]:
     # Retrieve all actors from all films
-    all_actors = [actors for film in db.all() for actors in film['actors']]
+    all_actors = [actor for film in db.all() for actor in film['actors']]
 
     # Use Counter to count the occurrences of each actor
     actors: Counter[str] = Counter(all_actors)
