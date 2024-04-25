@@ -6,3 +6,4 @@ class SelectingFilm(StatesGroup):
     waiting_for_duration = State()
     waiting_for_rating = State()
 
+

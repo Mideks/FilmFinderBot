@@ -38,6 +38,7 @@ class DataType(enum.Enum):
     Quality = "Quality"
     AgeRestriction = "AgeRestriction"
     Genre = "Genre"
+    Actors = "Actors"
 
 
 class DataButton(CallbackData, prefix="select_genre", sep=">"):

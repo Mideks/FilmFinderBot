@@ -20,6 +20,10 @@ def search_films_by_filters(filters: SearchFilters) -> list[Document]:
     if len(genres) == 0:
         genres = list(get_films_genres())
 
+    actors = filters.actors
+    if len(actors) == 0:
+        actors = list(get_films_actors())
+
     def has_quality_not_less_than(quality_list: list[int], min_quality: int):
         return any(quality >= min_quality for quality in quality_list)
 
@@ -28,6 +32,7 @@ def search_films_by_filters(filters: SearchFilters) -> list[Document]:
         & (Film.duration <= duration)
         & (Film.availableQuality.test(has_quality_not_less_than, int(filters.quality)))
         & (Film.ageRestriction <= filters.age_restriction)
+        & (Film.actors.any(actors))
         & (Film.genres.any(genres))
     )
     return result
@@ -61,3 +66,13 @@ def get_films_genres() -> Counter[str]:
     genres: Counter[str] = Counter(all_genres)
 
     return genres
+
+
+def get_films_actors() -> Counter[str]:
+    # Retrieve all actors from all films
+    all_actors = [actors for film in db.all() for actors in film['actors']]
+
+    # Use Counter to count the occurrences of each actor
+    actors: Counter[str] = Counter(all_actors)
+
+    return actors

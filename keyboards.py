@@ -91,6 +91,27 @@ def get_age_restriction_keyboard(selected_age_restriction: str) -> InlineKeyboar
     return builder.as_markup()
 
 
+def get_actors_keyboard(selected_actors: list[str]) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    actors = db_functions.get_films_actors()
+    max_actors = 20
+    for actors, n in actors.most_common(max_actors):
+        button_text = f"{actors.capitalize()} ({n})"
+        if actors in selected_actors:
+            button_text = f"✅ {button_text}"
+
+        builder.button(
+            text=button_text,
+            callback_data=DataButton(type=DataType.Actors, data=actors)
+        )
+
+    builder.button(text="◀️ Назад к фильтрам",
+                   callback_data=NavigateButton(location=NavigateButtonLocation.SearchMenu))
+
+    builder.adjust(2)
+
+    return builder.as_markup()
+
 def get_quality_keyboard(selected_quality: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
