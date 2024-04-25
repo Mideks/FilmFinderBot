@@ -108,7 +108,6 @@ async def send_film_message(message: Message, film: dict, state: FSMContext, sen
 
     path = "films/" + film["image"]
     if not os.path.exists(path):
-        # todo: исправить все ошибки с ненайденными файлами
         await message.answer("Извините, не удалось отправить картинку")
         print(f"photo_path = {path} не существует")
         return
