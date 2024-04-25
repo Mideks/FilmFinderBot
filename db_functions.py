@@ -23,7 +23,7 @@ def search_films_by_filters(filters: SearchFilters) -> list[Document]:
     )
 
     if len(filters.genres) != 0:
-        query &= (Film.genres.any(filters.genres))
+        query &= Film.genres.test(lambda genres_list: any(genre.lower() in genres_list for genre in filters.genres))
 
     if len(filters.actors) != 0:
         query &= (Film.actors.any(filters.actors))
