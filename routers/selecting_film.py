@@ -22,6 +22,7 @@ async def send_search_film_filters_menu_message(
         f"<b>Рейтинг:</b> {'любой' if filters.rating == 0 else f'от {filters.rating} ⭐️'}\n"
         f"<b>Возрастное ограничение:</b> {filters.age_restriction}+\n"
         f"<b>Жанры:</b> {'любые' if len(filters.genres) == 0 else ', '.join(filters.genres)}\n"
+        f"<b>Актеры:</b>{'любые' if len(filters.actors) == 0 else ', '.join(filters.actors)}\n"
         f"<b>Длительность:</b> {'любая' if filters.duration == 0 else f'до {filters.duration} мин.'}\n"
         f"<b>Качество:</b> от {filters.quality}p\n"
     )
@@ -132,6 +133,40 @@ async def select_age_restriction_handler(
     await callback.message.edit_reply_markup(
         reply_markup=keyboards.get_age_restriction_keyboard(str(search_filters.age_restriction))
     )
+    await callback.answer()
+
+
+@router.callback_query(NavigateButton.filter(F.location == NavigateButtonLocation.SelectActor))
+async def select_actors_menu_handler(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+
+    await callback.message.edit_text(
+        "🙎 Выберите желаемых актёров. \n"
+        "Мы постараемся для вас найти фильм, в котором присутствует хотя бы один актёр",
+        reply_markup=keyboards.get_actors_keyboard(search_filters.actors)
+    )
+
+    await callback.answer()
+
+
+@router.callback_query(DataButton.filter(F.type == DataType.Actors))
+async def select_actors_handler(
+        callback: CallbackQuery, callback_data: DataButton, state: FSMContext) -> None:
+
+    data = await state.get_data()
+    search_filters: SearchFilters = data["search_filters"]
+    actors = callback_data.data
+    if actors not in search_filters.actors:
+        search_filters.actors.append(actors)
+    else:
+        search_filters.actors.remove(actors)
+
+    await state.update_data(search_filters=search_filters)
+    await callback.message.edit_reply_markup(
+        reply_markup=keyboards.get_actors_keyboard(search_filters.actors)
+    )
+
     await callback.answer()
 
 

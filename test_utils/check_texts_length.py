@@ -1,7 +1,6 @@
 from tinydb import TinyDB
 
 from routers.film_card import generate_film_card_text
-
 db = TinyDB(r'..\films\info.json')
 
 for film in db.all():
