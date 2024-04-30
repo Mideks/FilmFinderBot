@@ -10,8 +10,5 @@ COPY . /app
 # Установите зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Укажите директорию films как volume
-VOLUME /app/films
-
 # Запустите приложение
 CMD ["python", "main.py"]
