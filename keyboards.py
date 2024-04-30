@@ -163,7 +163,7 @@ def get_rating_keyboard(selected_rating: str) -> InlineKeyboardMarkup:
 
     if selected_rating not in default_ratings and float(selected_rating) != 0:
         builder.button(
-            text=f"✅ Ваш выбор: от {selected_rating:.2f} ⭐️",
+            text=f"✅ Ваш выбор: от {selected_rating} ⭐️",
             callback_data=DataButton(type=DataType.Rating, data=selected_rating)
         )
 

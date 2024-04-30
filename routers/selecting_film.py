@@ -256,7 +256,7 @@ async def enter_rating_handler(message: Message, state: FSMContext):
         await message.delete()
         return
 
-    search_filters.rating = value
+    search_filters.rating = round(value, 2)
 
     await state.update_data(search_filters=search_filters)
 
